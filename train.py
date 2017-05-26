@@ -20,6 +20,23 @@ def lookForSameWords(sentence_1, sentence_2):
         appearance = sentence_2.count(word)
         if appearance != 0:
             # add the word if it hasn't been added
+            if sameWords.count(word) == 0:
+                sameWords.append(word)
+    return sameWords
+
+# return a list of words that only appear in one of the sentences
+def lookForUniqueWords(sentence_1, sentence_2, sameWords):
+    uniqueWords = []
+    for word in sentence_1:
+        if uniqueWords.count(word) == 0:
+            uniqueWords.append(word)
+    for word in sentence_2:
+        if uniqueWords.count(word) == 0:
+            uniqueWords.append(word)
+    for word in sameWords:
+        uniqueWords.remove(word)
+
+    return uniqueWords
 
 # A class that refers to the pre-processed raw data
 class Data:
@@ -27,8 +44,6 @@ class Data:
         self.__readFile(fileName)
         self.__toLowerCase()
         self.__toLists()
-        # initialize the dictionary
-        self.__dictionary = []
 
     def __readFile(self, fileName):
         openFile = open(fileName, 'r')
@@ -78,17 +93,15 @@ class Dictionary:
             self.__dictionary.append([word, 0.5, 1, ()])
         else:
             # reduce the significance of the word
-            self.__incrementCount(word)
             print "Repeat words"
 
     def __wordExist(self, word):
         for entry in self.__dictionary:
             if entry[0] == word:
+                # increment the word count
+                entry[2] = entry[2] + 1
                 return True
         return False
-
-    def __incrementCount(self, word):
-
 
     def getDictionary(self):
         return self.__dictionary
@@ -107,13 +120,27 @@ def learn(dictionary, data):
         if row[5] == 1:
             # look for words that are in both questions
             sameWords = lookForSameWords(row[3], row[4])
-
+            print sameWords
+            # TODO: increase the significance of all the same words
+            uniqueWords = lookForUniqueWords(row[3], row[4], sameWords)
+            print uniqueWords
+            # TODO: decrease the significance of all the different words
+        else:   # the two questions are non-duplicate
+            # look for words that are in both questions
+            sameWords = lookForSameWords(row[3], row[4])
+            print sameWords
+            # TODO: decrease th significance of all the same words
+            uniqueWords = lookForUniqueWords(row[3], row[4], sameWords)
+            print uniqueWords
+            # TODO: increase the significance of all the different words
 
 if __name__ == "__main__":
     trainingSet = Data("train.csv")
     myDictionary = Dictionary()
     processedData = trainingSet.getRawData()
+    for row in processedData:
+        print row
     learn(myDictionary, processedData)
 
-    for row in myDictionary.getDictionary():
-        print row
+    # for row in myDictionary.getDictionary():
+    #     print row
