@@ -12,6 +12,7 @@ from Data import Data
 from Dictionary import Dictionary
 from helper import lookForSameWords
 from helper import lookForUniqueWords
+from helper import createWordPairs
 
 # start analyzing the data and updating the dictionary
 def learn(dictionary, data):
@@ -27,30 +28,30 @@ def learn(dictionary, data):
         if row[5] == 1:
             # look for words that are in both questions
             sameWords = lookForSameWords(row[3], row[4])
-            # print sameWords
-            # TODO: increase the significance of all the same words
+            #print sameWords
             dictionary.increaseSignificanceWRTSameWords(sameWords)
             uniqueWords = lookForUniqueWords(row[3], row[4], sameWords)
-            # print uniqueWords
-            # TODO: decrease the significance of all the different words
+            #print uniqueWords
             dictionary.reduceSignificanceWRTUniqueWords(uniqueWords)
+            # TODO: Analyze neighboring words
+            createWordPairs(row[3], row[4])
         else:   # the two questions are non-duplicate
             # look for words that are in both questions
             sameWords = lookForSameWords(row[3], row[4])
             # print sameWords
-            # TODO: decrease th significance of all the same words
             dictionary.reduceSignificanceWRTSameWords(sameWords)
             uniqueWords = lookForUniqueWords(row[3], row[4], sameWords)
             # print uniqueWords
-            # TODO: increase the significance of all the different words
             dictionary.increaseSignificanceWRTUniqueWords(uniqueWords)
+            # TODO: Analyze neighboring words
+            createWordPairs(row[3], row[4])
 
 if __name__ == "__main__":
     trainingSet = Data("train.csv")
     myDictionary = Dictionary()
     processedData = trainingSet.getRawData()
-    for row in processedData:
-        print row
+    # for row in processedData:
+    #     print row
     learn(myDictionary, processedData)
 
     myDictionary.sort()

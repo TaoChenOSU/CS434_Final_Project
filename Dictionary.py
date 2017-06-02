@@ -14,6 +14,8 @@ class Dictionary:
         self.__dictionary = dict()
         self.__numOfAllWords = 0
 
+    # the addWords function will convert all words
+    # from plural to singlular form if they are plural
     def addWords(self, word):
         self.__numOfAllWords += 1
         if self.__wordExist(word) == False:

@@ -79,3 +79,17 @@ def myTan(x, K):
 def myArcTan(x, K):
     print 1 - (2/math.pi)*math.atan(x/K)
     return 1 - (2/math.pi)*math.atan(x/K)
+
+# return all pairs of different words in two questions
+def createWordPairs(sentence_1, sentence_2):
+    pairs = []
+    for word_1 in sentence_1:
+        for word_2 in sentence_2:
+            if word_1 != word_2:
+                # To make sure the no such pair or the reverse of the pair has been created
+                if pairs.count((word_1, word_2)) == 0 and pairs.count((word_2, word_1)) == 0:
+                    pairs.append((word_1, word_2))
+
+    return pairs
+
+# Analyze neighboring words
