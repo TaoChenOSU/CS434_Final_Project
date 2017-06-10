@@ -17,7 +17,7 @@ class Data:
         readCSV = csv.reader(openFile, delimiter=',')
         self.__rawData = []
 
-        limit = 1
+        limit = 10000
         currentAmount = 0
         for row in readCSV:
             if currentAmount > limit:

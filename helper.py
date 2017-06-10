@@ -6,6 +6,7 @@ from __future__ import division
 # this is a file that contains helper functions
 import string
 import math
+import numpy as np
 # return a list of words with punctuations removed
 def wordsToLists(sentence):
     return list(sentence.translate(None, string.punctuation).split())
@@ -81,15 +82,82 @@ def myArcTan(x, K):
     return 1 - (2/math.pi)*math.atan(x/K)
 
 # return all pairs of different words in two questions
+# also record the positions of both words in the sentences
 def createWordPairs(sentence_1, sentence_2):
     pairs = []
+    pairsWithPositions = []
+    word_1_pos = 0
     for word_1 in sentence_1:
+        word_2_pos = 0
         for word_2 in sentence_2:
             if word_1 != word_2:
                 # To make sure the no such pair or the reverse of the pair has been created
-                if pairs.count((word_1, word_2)) == 0 and pairs.count((word_2, word_1)) == 0:
-                    pairs.append((word_1, word_2))
+                # if pairs.count([word_1, word_2]) == 0 and pairs.count([word_2, word_1]) == 0:
+                # if pairs.count([word_1, word_2]) == 0:
+                pairs.append([word_1, word_2])
+                pairsWithPositions.append([word_1, word_2, [[word_1_pos, word_2_pos]]])
+                # elif pairs.count([word_1, word_2]) == 0 and pairs.count([word_2, word_1]) != 0:
+                #     index = pairs.index([word_2, word_1])
+                #     pairsWithPositions[index][2].append([word_1_pos, word_2_pos])
+                # else:
+                #     index = pairs.index([word_1, word_2])
+                #     pairsWithPositions[index][2].append([word_1_pos, word_2_pos])
+            word_2_pos += 1
+        word_1_pos += 1
 
-    return pairs
+    return pairsWithPositions
 
-# Analyze neighboring words
+# find neighboring words
+def wordConnection(sentence_1, sentence_2):
+    # default k to be 1, meaning the function is going
+    # to analyze the two neighboring words on each side
+    # For now, k is fixed at 1 to avoid more complex programming
+    # and k = 1 makes finding connectivity more easily
+    # if you change k to any number other than 1, the program
+    # will crash
+    k = 1
+    # the original pair plus the neighboring words
+    connections = []
+    wordPairs = createWordPairs(sentence_1, sentence_2)
+    # find neighboring words
+    # if there's less than 2 neighboring words, work with however
+    # many there is.
+    sentence_1_len = len(sentence_1)
+    sentence_2_len = len(sentence_2)
+
+    for pair in wordPairs:
+        # [[words in sentence_1], [words in sentence_2]]
+        left = []
+        right = []
+        for position in pair[2]:
+            # left side, both words have at least k words on their left sides
+            if position[0]-k >= 0 and position[1]-k >= 0:
+                for i in range(k):
+                    left.append([sentence_1[position[0]-1-i], sentence_2[position[1]-1-i]])
+            # left side, one or both of the sides has less than k words
+            elif position[0]-k < 0 or position[1]-k < 0:
+                if position[0] <= position[1]:
+                    for i in range(position[0]):
+                        left.append([sentence_1[position[0]-1-i], sentence_2[position[1]-1-i]])
+                else:
+                    for i in range(position[1]):
+                        left.append([sentence_1[position[0]-1-i], sentence_2[position[1]-1-i]])
+
+            # right side, both words have at least k words on their right sides
+            if position[0]+k < sentence_1_len and position[1]+k < sentence_2_len:
+                for i in range(k):
+                    right.append([sentence_1[position[0]+1+i], sentence_2[position[1]+1+i]])
+            # right side, one of the sides has less than k words
+            elif position[0]+k >= sentence_1_len or position[1]+k >= sentence_2_len:
+                if sentence_1_len-position[0] >= sentence_2_len-position[1]:
+                    for i in range(sentence_2_len-position[1]-1):
+                        right.append([sentence_1[position[0]+1+i], sentence_2[position[1]+1+i]])
+                else:
+                    for i in range(sentence_1_len-position[0]-1):
+                        right.append([sentence_1[position[0]+1+i], sentence_2[position[1]+1+i]])
+
+        connections.append([pair[0], pair[1], list(left), list(right)])
+
+    # for item in connections:
+    #     print item
+    return connections

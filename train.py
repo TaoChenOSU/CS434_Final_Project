@@ -12,7 +12,7 @@ from Data import Data
 from Dictionary import Dictionary
 from helper import lookForSameWords
 from helper import lookForUniqueWords
-from helper import createWordPairs
+from helper import wordConnection
 
 # start analyzing the data and updating the dictionary
 def learn(dictionary, data):
@@ -34,7 +34,8 @@ def learn(dictionary, data):
             #print uniqueWords
             dictionary.reduceSignificanceWRTUniqueWords(uniqueWords)
             # TODO: Analyze neighboring words
-            createWordPairs(row[3], row[4])
+            neighboringWords = wordConnection(row[3], row[4])
+            dictionary.analyzeConnectivity(neighboringWords)
         else:   # the two questions are non-duplicate
             # look for words that are in both questions
             sameWords = lookForSameWords(row[3], row[4])
@@ -44,7 +45,8 @@ def learn(dictionary, data):
             # print uniqueWords
             dictionary.increaseSignificanceWRTUniqueWords(uniqueWords)
             # TODO: Analyze neighboring words
-            createWordPairs(row[3], row[4])
+            neighboringWords = wordConnection(row[3], row[4])
+            dictionary.analyzeConnectivity(neighboringWords)
 
 if __name__ == "__main__":
     trainingSet = Data("train.csv")
@@ -54,6 +56,7 @@ if __name__ == "__main__":
     #     print row
     learn(myDictionary, processedData)
 
+    myDictionary.reduceSignificanceByRatio()
     myDictionary.sort()
     # for row in myDictionary.getDictionary():
     #     print row, myDictionary.getDictionary()[row]
