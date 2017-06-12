@@ -6,6 +6,8 @@ import math
 import random
 import numpy as np
 import helper
+from helper import lookForSameWords
+from helper import lookForUniqueWords
 # this file contains the Dictionary class and all its methods
 
 # A class that refers to the dictionary
@@ -67,10 +69,10 @@ class Dictionary:
             if item[2] != [] and item[3] != []:
                 if item[2][0][0] == item[2][0][1] and item[3][0][0] == item[3][0][1]:
                     # this pair might be related to each other either positively or negatively
-                    self._addConnection(item[0], item[1])
+                    self.__addConnection(item[0], item[1])
 
     # create connection/increase similarity between words
-    def _addConnection(self, entry, word):
+    def __addConnection(self, entry, word):
         # if the connection doesn't exist, create the connection
         if not self.__dictionary[entry][2].has_key(word):
             self.__dictionary[entry][2][word] = 1
@@ -83,5 +85,86 @@ class Dictionary:
         return self.__dictionary
 
     def sort(self):
-        for key, value in sorted(self.__dictionary.iteritems(), key=lambda (k, v): (v[0], k)):
-            print key, value
+        self.__sortedDictionary = sorted(self.__dictionary.iteritems(), key=lambda (k, v): (v[0], k))
+
+    def getSortedDictionary(self):
+        return self.__sortedDictionary
+    # normalize the siginifance such that the the ranking of the words
+    # in the dictionary is maintained while adjusting the significance
+    # to maximize the significance difference for unique words and same words
+    def normailizeSignificance(self, data):
+        for pair in data:
+            sameWords = lookForSameWords(pair[3], pair[4])
+            uniqueWords = lookForUniqueWords(pair[3], pair[4], sameWords)
+
+            sumOfSameWords = helper.sumOfSignificance(sameWords, self.getDictionary())
+            sumOfUniqueWords = helper.sumOfSignificance(uniqueWords, self.getDictionary())
+
+            if pair[5] == 1:
+                if sumOfUniqueWords > sumOfSameWords:
+                    # wrong because if the pair is duplicate, same words should
+                    # have a greater sum of significance that unique words
+                    # TODO: try to make sumOfSameWords > sumOfUniqueWords
+                    # print pair[3]
+                    # print pair[4]
+                    # print sameWords, sumOfSameWords, sumOfUniqueWords
+                    self.__adjust(sameWords, uniqueWords)
+            else:
+                if sumOfUniqueWords < sumOfSameWords:
+                    # wrong because if the pair is non-duplicate, same words should
+                    # have a smaller sum of significance that unique words
+                    # TODO: try to make sumOfUniqueWords > sumOfSameWords
+                    # print pair[3]
+                    # print pair[4]
+                    # print uniqueWords, sumOfSameWords, sumOfUniqueWords
+                    self.__adjust(uniqueWords, sameWords)
+
+    # try to maximize (toBeIncreased - toBeDecreased)
+    def __adjust(self, toBeIncreased, toBeDecreased):
+        itemizeDictionary = self.getSortedDictionary()
+        # find the lower bound and upper bound
+        # these two dictionaries are useless
+        # declare them just in case I need them in the future
+        rangeOfAllowanceForToBeIncreased = dict()
+        rangeOfAllowanceForToBeDecreased = dict()
+
+        # find the range between which the significance of the word is in
+        for word in toBeIncreased:
+            entry = self.__dictionary[word[0]]
+            # index is the ranking of the word in the dictionary
+            index = itemizeDictionary.index((word[0], entry))
+            if index > 0 and index < len(itemizeDictionary) - 1:
+                rangeOfAllowanceForToBeIncreased[word[0]] = (itemizeDictionary[index-1][1][0], itemizeDictionary[index+1][1][0])
+            elif index == 0:
+                rangeOfAllowanceForToBeIncreased[word[0]] = (-float('inf'), itemizeDictionary[index+1][1][0])
+            else:
+                rangeOfAllowanceForToBeIncreased[word[0]] = (itemizeDictionary[index-1][1][0], float('inf'))
+
+            # new significance
+            if rangeOfAllowanceForToBeIncreased[word[0]][1] == float('inf'):
+                # increase by 10%
+                newSignificance = self.__dictionary[word[0]][0] * 1.1
+            else:
+                # half point between upper bound and itself
+                newSignificance = (rangeOfAllowanceForToBeIncreased[word[0]][1] + self.__dictionary[word[0]][0])/2
+            self.__dictionary[word[0]][0] = newSignificance
+
+        for word in toBeDecreased:
+            entry = self.__dictionary[word[0]]
+            # index is the ranking of the word in the dictionary
+            index = itemizeDictionary.index((word[0], entry))
+            if index > 0 and index < len(itemizeDictionary) - 1:
+                rangeOfAllowanceForToBeDecreased[word[0]] = (itemizeDictionary[index-1][1][0], itemizeDictionary[index+1][1][0])
+            elif index == 0:
+                rangeOfAllowanceForToBeDecreased[word[0]] = (-float('inf'), itemizeDictionary[index+1][1][0])
+            else:
+                rangeOfAllowanceForToBeDecreased[word[0]] = (itemizeDictionary[index-1][1][0], float('inf'))
+
+            # new significance
+            if rangeOfAllowanceForToBeDecreased[word[0]][1] == -float('inf'):
+                # decrease by 10%
+                newSignificance = self.__dictionary[word[0]][0] * 0.9
+            else:
+                # half point between upper bound and itself
+                newSignificance = (rangeOfAllowanceForToBeDecreased[word[0]][0] + self.__dictionary[word[0]][0])/2
+            self.__dictionary[word[0]][0] = newSignificance

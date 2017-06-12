@@ -78,7 +78,7 @@ def myTan(x, K):
 # The bigger k gets, the less it will suffer
 # K > 0
 def myArcTan(x, K):
-    print 1 - (2/math.pi)*math.atan(x/K)
+    # print 1 - (2/math.pi)*math.atan(x/K)
     return 1 - (2/math.pi)*math.atan(x/K)
 
 # return all pairs of different words in two questions
@@ -161,3 +161,12 @@ def wordConnection(sentence_1, sentence_2):
     # for item in connections:
     #     print item
     return connections
+
+# sum up their significance
+def sumOfSignificance(words, dictionary):
+    significance = 0
+    for item in words:
+        # signifiance times the # of appearance
+        significance += dictionary[item[0]][0] * item[1]
+
+    return significance

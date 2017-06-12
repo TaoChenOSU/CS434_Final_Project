@@ -5,19 +5,19 @@ from __future__ import division
 # this is the file that contains the Data class and all its methods
 import csv
 from helper import wordsToLists
+
 # A class that refers to the pre-processed raw data
 class Data:
-    def __init__(self, fileName):
-        self.__readFile(fileName)
+    def __init__(self, fileName, limit):
+        self.__readFile(fileName, limit)
         self.__toLowerCase()
         self.__toLists()
 
-    def __readFile(self, fileName):
+    def __readFile(self, fileName, limit):
         openFile = open(fileName, 'r')
         readCSV = csv.reader(openFile, delimiter=',')
         self.__rawData = []
 
-        limit = 10000
         currentAmount = 0
         for row in readCSV:
             if currentAmount > limit:

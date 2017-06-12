@@ -13,6 +13,7 @@ from Dictionary import Dictionary
 from helper import lookForSameWords
 from helper import lookForUniqueWords
 from helper import wordConnection
+from Test import Test
 
 # start analyzing the data and updating the dictionary
 def learn(dictionary, data):
@@ -31,9 +32,9 @@ def learn(dictionary, data):
             #print sameWords
             dictionary.increaseSignificanceWRTSameWords(sameWords)
             uniqueWords = lookForUniqueWords(row[3], row[4], sameWords)
-            #print uniqueWords
+            # print uniqueWords
             dictionary.reduceSignificanceWRTUniqueWords(uniqueWords)
-            # TODO: Analyze neighboring words
+            # Analyze neighboring words
             neighboringWords = wordConnection(row[3], row[4])
             dictionary.analyzeConnectivity(neighboringWords)
         else:   # the two questions are non-duplicate
@@ -44,19 +45,31 @@ def learn(dictionary, data):
             uniqueWords = lookForUniqueWords(row[3], row[4], sameWords)
             # print uniqueWords
             dictionary.increaseSignificanceWRTUniqueWords(uniqueWords)
-            # TODO: Analyze neighboring words
+            # Analyze neighboring words
             neighboringWords = wordConnection(row[3], row[4])
             dictionary.analyzeConnectivity(neighboringWords)
 
 if __name__ == "__main__":
-    trainingSet = Data("train.csv")
+    # create objects
+    trainingSet = Data("train.csv", 20000)
     myDictionary = Dictionary()
+    # filter data
     processedData = trainingSet.getRawData()
-    # for row in processedData:
-    #     print row
+    # start learning using the processed data
     learn(myDictionary, processedData)
-
+    # have to reduce the significance based on ratio
+    # could potentially rearrange some of the words
     myDictionary.reduceSignificanceByRatio()
+    # normalize the siginifance such that the the ranking of the words
+    # in the dictionary is maintained while adjusting the significance
+    # to maximize the significance difference
     myDictionary.sort()
-    # for row in myDictionary.getDictionary():
-    #     print row, myDictionary.getDictionary()[row]
+    # adjust the significance multiple times
+    for i in range(20):
+        myDictionary.normailizeSignificance(processedData)
+    # print myDictionary.getSortedDictionary()
+
+    # start testing
+    test = Test("train.csv", 1000)
+    result = test.getResult(myDictionary.getDictionary())
+    print "Error Rate: ", result
