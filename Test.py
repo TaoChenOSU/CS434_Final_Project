@@ -37,19 +37,19 @@ class Test:
                 additionalSignificance, uniqueWords = self.__uniqueWordAnalizer(uniqueWords, dictionary)
                 sumOfSameWords += additionalSignificance
             sumOfUniqueWords = self.__findSumOfUniqueWords(uniqueWords, dictionary)
-
-            if sumOfUniqueWords < sumOfSameWords:
-                if pair[5] == 1:
-                    correct += 1
-                else:
-                    incorrect += 1
-            else:
-                if pair[5] == 1:
-                    incorrect += 1
-                else:
-                    correct += 1
-
-        return correct, incorrect
+        #
+        #     if sumOfUniqueWords < sumOfSameWords:
+        #         if pair[5] == 1:
+        #             correct += 1
+        #         else:
+        #             incorrect += 1
+        #     else:
+        #         if pair[5] == 1:
+        #             incorrect += 1
+        #         else:
+        #             correct += 1
+        #
+        # return correct, incorrect
 
     # sum up their significance
     def __findSumOfSameWords(self, sameWords, dictionary):
@@ -76,23 +76,24 @@ class Test:
             for i in range(length-index-1):
                 #  found one similar word
                 # print len(uniqueWords), index, i
-                if dictionary[entry[0]][2].has_key(uniqueWords[index+i+1][0]):
-                    word_1_significance = dictionary[entry[0]][0] * entry[1]
-                    word_2_significance = dictionary[uniqueWords[index+i+1][0]][0] * uniqueWords[index+i+1][1]
-                    totalAppearance = entry[1] + uniqueWords[index+i+1][1]
-                    significance += 0.8 * (word_1_significance + word_1_significance)/totalAppearance
-                    uniqueWords.pop(index)
-                    uniqueWords.pop(index+i)
-                    found = True
-                    if len(uniqueWords) >= 2:
-                        if index < len(uniqueWords):
-                            entry = uniqueWords[index]
+                if dictionary.has_key(entry[0]):
+                    if dictionary[entry[0]][2].has_key(uniqueWords[index+i+1][0]):
+                        word_1_significance = dictionary[entry[0]][0] * entry[1]
+                        word_2_significance = dictionary[uniqueWords[index+i+1][0]][0] * uniqueWords[index+i+1][1]
+                        totalAppearance = entry[1] + uniqueWords[index+i+1][1]
+                        significance += 0.8 * (word_1_significance + word_1_significance)/totalAppearance
+                        uniqueWords.pop(index)
+                        uniqueWords.pop(index+i)
+                        found = True
+                        if len(uniqueWords) >= 2:
+                            if index < len(uniqueWords):
+                                entry = uniqueWords[index]
+                            else:
+                                entry = uniqueWords[len(uniqueWords)-1]
+                            break
                         else:
-                            entry = uniqueWords[len(uniqueWords)-1]
-                        break
-                    else:
-                        quit = True
-                        break
+                            quit = True
+                            break
             # exit the for loop meaning no similar words are found
             if not found:
                 entry = uniqueWords[index+1]

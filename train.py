@@ -51,7 +51,7 @@ def learn(dictionary, data):
 
 if __name__ == "__main__":
     # create objects
-    trainingSet = Data("train.csv", 20000)
+    trainingSet = Data("train.csv", 100)
     myDictionary = Dictionary()
     # filter data
     processedData = trainingSet.getRawData()
@@ -69,7 +69,11 @@ if __name__ == "__main__":
         myDictionary.normailizeSignificance(processedData)
     # print myDictionary.getSortedDictionary()
 
-    # start testing
-    test = Test("train.csv", 1000)
-    result = test.getResult(myDictionary.getDictionary())
-    print "Error Rate: ", result
+    featureTable = trainingSet.generateFeatures(myDictionary)
+    for row in featureTable:
+        print row
+
+    # # start testing
+    # test = Test("train.csv", 20000)
+    # result = test.getResult(myDictionary.getDictionary())
+    # print "Error Rate: ", result

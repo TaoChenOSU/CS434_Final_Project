@@ -168,3 +168,15 @@ class Dictionary:
                 # half point between upper bound and itself
                 newSignificance = (rangeOfAllowanceForToBeDecreased[word[0]][0] + self.__dictionary[word[0]][0])/2
             self.__dictionary[word[0]][0] = newSignificance
+
+
+    # sum up the incoming words significance
+    def sumOfSignificance(self, words):
+        significance = 0
+        for item in words:
+            # signifiance times the # of appearance
+            # words that're not in the dictionary have signifiance of 0
+            if self.__dictionary.has_key(item[0]):
+                significance += self.__dictionary[item[0]][0] * item[1]
+
+        return significance
